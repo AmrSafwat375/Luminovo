@@ -1,0 +1,7 @@
+Start by saving the script as a python file (.py)
+Upload it to Elektronik AG windows file by a direct network transfer (ask IT team for the IP address and credentials and enter them in remote desktop connection)
+Install the (requests, pandas) libraries & ensure python 3 is installed 
+use our provided api key to gain and enter it in the script
+use windows task scheduler to rerun the script at the desired intervals
+in task scheduler choose create basic task, trigger timing, and our python script to have it run the code at our desired intervals
+use our created text file sync_log.txt to check our code status (code run successfully or potential error codes)
