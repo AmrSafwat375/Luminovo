@@ -1,0 +1,55 @@
+import requests
+import pandas as pd
+from datetime import datetime
+
+# Configuration
+API_URL = "https://api.luminovo.com/v1/stock-levels"  # Replace with actual endpoint
+API_KEY = "API Key"  # Replace with actual key
+LOG_FILE = "sync_log.txt"
+EXCEL_FILE_PATH = "/mnt/data/Availability.xlsx"
+DEFAULT_WAREHOUSE_ID = "WH1"  # set a default warehouse ID if none are present
+
+# Function to log results with the execution date
+def log_message(message):
+    with open(LOG_FILE, "a") as log:
+        log.write(f"{datetime.now()} - {message}\n")
+
+# Function to send data to Luminovo
+def send_to_luminovo(data):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    response = requests.post(API_URL, json=data, headers=headers)
+    return response
+
+# Read Excel file and process data
+def process_excel_file():
+    try:
+        # Read the Excel file
+        df = pd.read_excel(EXCEL_FILE_PATH)
+
+        # Transform data to Luminovo API format
+        payload = []
+        for _, row in df.iterrows():
+            item = {
+                "item_id": str(row["Internal Part Number"]),
+                "stock_level": int(row["Available Stock"]),
+                "warehouse_id": DEFAULT_WAREHOUSE_ID,
+                "last_updated": datetime.now().isoformat()
+            }
+            payload.append(item)
+
+        # Send data to Luminovo
+        response = send_to_luminovo(payload)
+
+        if response.status_code == 200:
+            log_message("Data successfully synchronized.")
+        else:
+            log_message(f"Error: {response.status_code} - {response.text}")
+
+    except Exception as e:
+        log_message(f"Exception occurred: {str(e)}")
+
+if __name__ == "__main__":
+    process_excel_file()
